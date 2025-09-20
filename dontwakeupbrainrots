@@ -1,0 +1,102 @@
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Função para teleportar para cima do mapa
+local function teleportAboveMap()
+    -- Verifica se o personagem existe
+    if not character or not rootPart then
+        warn("Personagem não encontrado!")
+        return
+    end
+    
+    -- Pega a posição atual do personagem
+    local currentPosition = rootPart.Position
+    
+    -- Calcula a posição acima do mapa (mantém X e Z, aumenta Y)
+    local teleportPosition = Vector3.new(currentPosition.X, currentPosition.Y + 200, currentPosition.Z)
+    
+    -- Efeito visual antes do teleporte
+    local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    
+    -- Efeito de fade out
+    local fadeOutTween = TweenService:Create(rootPart, tweenInfo, {
+        Transparency = 0.8
+    })
+    
+    fadeOutTween:Play()
+    wait(0.3)
+    
+    -- Teleporta para cima do mapa
+    rootPart.CFrame = CFrame.new(teleportPosition)
+    
+    -- Efeito visual após o teleporte
+    rootPart.Transparency = 1
+    local fadeInTween = TweenService:Create(rootPart, tweenInfo, {
+        Transparency = 0
+    })
+    
+    fadeInTween:Play()
+    
+    print("Teleportado para cima do mapa!")
+end
+
+-- Cria a GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TeleportGui"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 220, 0, 50)
+frame.Position = UDim2.new(0, 10, 0, 10)
+frame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+
+-- Adiciona cantos arredondados
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = frame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(1, -10, 1, -10)
+button.Position = UDim2.new(0, 5, 0, 5)
+button.BackgroundColor3 = Color3.new(0.2, 0.5, 0.8)
+button.BorderSizePixel = 0
+button.Text = "�� Teleportar para Cima"
+button.TextColor3 = Color3.new(1, 1, 1)
+button.TextScaled = true
+button.Font = Enum.Font.GothamBold
+button.Parent = frame
+
+-- Adiciona cantos arredondados ao botão
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 6)
+buttonCorner.Parent = button
+
+-- Efeito hover
+button.MouseEnter:Connect(function()
+    button.BackgroundColor3 = Color3.new(0.3, 0.6, 0.9)
+end)
+
+button.MouseLeave:Connect(function()
+    button.BackgroundColor3 = Color3.new(0.2, 0.5, 0.8)
+end)
+
+-- Conecta a função de teleporte
+button.MouseButton1Click:Connect(teleportAboveMap)
+
+-- Atalho de teclado (opcional)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.U then
+        teleportAboveMap()
+    end
+end)
